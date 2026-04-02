@@ -18,7 +18,7 @@ services:
     container_name: app2
     ports:
       # ПРОБЛЕМА: Порт 8080 уже занят app1
-      - "8080:80"
+      - "8081:80"
 
   # 3. Read-only volume где нужен write
   app3:
@@ -27,27 +27,29 @@ services:
     command: sh -c "echo 'test' > /data/test.txt && cat /data/test.txt"
     volumes:
       # ПРОБЛЕМА: read-only, но пытается записать
-      - ./data:/data:ro
+      - ./data:/data:rw
 
   # 4. Exit code 0 при ошибке (контейнер падает, но Docker думает что всё ок)
   app4:
     image: alpine:latest
     container_name: app4
-    command: sh -c "ping nonexistent-host || exit 0"
+    command: sh -c "set -e; ping nonexistent-host"
     # ПРОБЛЕМА: exit 0 при ошибке - Docker не знает что проблема
+    # set -e → shell завершится при любой ошибке
 
   # 5. Бесконечный restart loop
   app5:
     image: alpine:latest
     container_name: app5
     command: sh -c "exit 1"
-    restart: always
+    restart: no
     # ПРОБЛЕМА: restart always + сразу падает = бесконечный loop
 
   # 6. Отсутствует обязательная переменная
   app6:
     image: postgres:15-alpine
     container_name: app6
-    # ПРОБЛЕМА: POSTGRES_PASSWORD обязательна, но не задана
+    environment:
+      POSTGRES_PASSWORD: "root"
     ports:
       - "5432:5432"

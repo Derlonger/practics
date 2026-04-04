@@ -6,7 +6,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 class ArchHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
-        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
 
         # Получаем информацию об архитектуре

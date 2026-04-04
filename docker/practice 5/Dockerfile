@@ -5,6 +5,7 @@ WORKDIR /app
 COPY app.py .
 
 RUN chown -R 1001:1001 /app
+
 USER 1001
 
 EXPOSE 8080

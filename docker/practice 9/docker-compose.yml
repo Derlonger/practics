@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  # Redis в ОТДЕЛЬНОЙ сети - никто не может к нему подключиться
   redis:
     image: redis:alpine
     container_name: redis
     networks:
-      - redis_net
+#      - redis_net
+      - backend_net
 
   # API/Backend - в internal сети (нет доступа наружу)
   api:
@@ -22,14 +22,15 @@ services:
     ports:
       - "8080:80"
     networks:
-      - frontend_net
+#      - frontend_net
+      - backend_net
     # Пытается подключиться к api, но не может (разные сети)
 
   # Worker - использует хардкод IP вместо имени
   worker:
     image: alpine:latest
     container_name: worker
-    command: sh -c "while true; do echo 'Trying to connect to 192.168.1.100:6379'; sleep 5; done"
+    command: sh -c "while true; do echo 'Trying to connect to redis:6379'; sleep 5; done"
     networks:
       - backend_net
     # Пытается подключиться к Redis по IP, который не существует
@@ -51,7 +52,6 @@ networks:
   # Backend в internal сети (нет доступа к интернету и другим сетям)
   backend_net:
     driver: bridge
-    internal: true
 
   # Frontend в своей сети
   frontend_net:
